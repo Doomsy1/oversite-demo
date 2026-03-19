@@ -5,7 +5,7 @@ from typing import Any
 
 def _node(node_type: str, node_key: str, display_label: str, pipeline_run_id: str) -> dict[str, Any]:
     return {
-        "pipeline_run_id": pipeline_run_id,
+        "last_materialized_run_id": pipeline_run_id,
         "node_type": node_type,
         "node_key": node_key,
         "display_label": display_label,
@@ -24,7 +24,7 @@ def _edge(
     event_timestamp: str | None,
 ) -> dict[str, Any]:
     return {
-        "pipeline_run_id": pipeline_run_id,
+        "last_materialized_run_id": pipeline_run_id,
         "src_node_key": src_node_key,
         "edge_type": edge_type,
         "dst_node_key": dst_node_key,
@@ -41,7 +41,7 @@ def build_graph_bundle(
     flag_records: list[dict[str, Any]],
     observations: list[dict[str, Any]],
 ) -> dict[str, list[dict[str, Any]]]:
-    pipeline_run_id = image_record["pipeline_run_id"]
+    pipeline_run_id = image_record["last_materialized_run_id"]
     event_timestamp = image_record.get("event_timestamp")
     session_key = f"session:{session_record['source_session_id']}"
     image_key = f"image:{image_record['source_event_id']}"

@@ -17,7 +17,7 @@ class DeriveObservationsTests(unittest.TestCase):
     def test_derive_observations_emits_source_and_text_backed_labels(self) -> None:
         image_record = {
             "id": "image-1",
-            "pipeline_run_id": "run-1",
+            "last_materialized_run_id": "run-1",
             "trade": "Electrical",
             "location_hint": "East wall stairwell",
             "site_hint": None,

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from oversite_pipeline.clients.supabase_rest import SupabaseRestClient
+from oversite_pipeline.transform.normalize import parse_blob_url
 
 
 IMAGE_EVENT_COLUMNS = (
@@ -28,6 +29,7 @@ def fetch_image_events(
     client: SupabaseRestClient,
     *,
     schema: str,
+    source_bucket: str,
     limit: int | None = None,
     window_start: str | None = None,
     window_end: str | None = None,
@@ -54,11 +56,26 @@ def fetch_image_events(
             limit=request_limit,
             offset=offset,
         )
-        rows.extend(page)
+        rows.extend(
+            row
+            for row in page
+            if _matches_source_bucket(row.get("blob_url"), source_bucket=source_bucket)
+        )
+        if limit is not None and len(rows) >= limit:
+            return rows[:limit]
         if len(page) < request_limit:
             break
         offset += len(page)
     return rows
+
+
+def _matches_source_bucket(blob_url: Any, *, source_bucket: str) -> bool:
+    if not isinstance(blob_url, str) or not blob_url:
+        return False
+    try:
+        return parse_blob_url(blob_url)["storage_bucket"] == source_bucket
+    except ValueError:
+        return False
 
 
 def fetch_sessions_for_events(

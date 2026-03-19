@@ -36,7 +36,7 @@ def normalize_image_record(
     metadata = event.get("metadata") or {}
     blob_parts = parse_blob_url(event["blob_url"])
     return {
-        "pipeline_run_id": pipeline_run_id,
+        "last_materialized_run_id": pipeline_run_id,
         "derived_session_id": derived_session_id,
         "source_event_id": event["id"],
         "source_session_id": event["session_id"],
@@ -68,7 +68,7 @@ def normalize_image_record(
 
 def normalize_session_record(*, session: dict[str, Any], pipeline_run_id: str) -> dict[str, Any]:
     return {
-        "pipeline_run_id": pipeline_run_id,
+        "last_materialized_run_id": pipeline_run_id,
         "source_session_row_id": session["id"],
         "source_session_id": session["session_id"],
         "company_id": session["company_id"],
@@ -89,7 +89,7 @@ def build_flag_records(image_record: dict[str, Any]) -> list[dict[str, Any]]:
         return []
     return [
         {
-            "pipeline_run_id": image_record["pipeline_run_id"],
+            "last_materialized_run_id": image_record["last_materialized_run_id"],
             "derived_image_id": image_record["id"],
             "flag_type": "event_type",
             "flag_value": "issue_flagged",

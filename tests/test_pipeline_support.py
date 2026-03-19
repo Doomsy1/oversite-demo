@@ -82,6 +82,7 @@ class ExtractSupportTests(unittest.TestCase):
         fetch_image_events(
             client,
             schema="public",
+            source_bucket="engagement-blobs",
             limit=5,
             window_start="2026-03-18T00:00:00+00:00",
             window_end=None,
@@ -101,6 +102,7 @@ class ExtractSupportTests(unittest.TestCase):
         fetch_image_events(
             client,
             schema="public",
+            source_bucket="engagement-blobs",
             limit=5,
             window_start=None,
             window_end="2026-03-19T00:00:00+00:00",
@@ -120,6 +122,7 @@ class ExtractSupportTests(unittest.TestCase):
         fetch_image_events(
             client,
             schema="public",
+            source_bucket="engagement-blobs",
             limit=5,
             window_start="2026-03-18T00:00:00+00:00",
             window_end="2026-03-19T00:00:00+00:00",
@@ -138,11 +141,29 @@ class ExtractSupportTests(unittest.TestCase):
         client = _RecordingSelectClient(
             pages=[
                 [
-                    {"id": "event-1"},
-                    {"id": "event-2"},
+                    {
+                        "id": "event-1",
+                        "blob_url": (
+                            "https://example.supabase.co/storage/v1/object/public/engagement-blobs/"
+                            "device/session/event-1.jpg"
+                        ),
+                    },
+                    {
+                        "id": "event-2",
+                        "blob_url": (
+                            "https://example.supabase.co/storage/v1/object/public/engagement-blobs/"
+                            "device/session/event-2.jpg"
+                        ),
+                    },
                 ],
                 [
-                    {"id": "event-3"},
+                    {
+                        "id": "event-3",
+                        "blob_url": (
+                            "https://example.supabase.co/storage/v1/object/public/engagement-blobs/"
+                            "device/session/event-3.jpg"
+                        ),
+                    },
                 ],
             ]
         )
@@ -150,6 +171,7 @@ class ExtractSupportTests(unittest.TestCase):
         rows = fetch_image_events(
             client,
             schema="public",
+            source_bucket="engagement-blobs",
             limit=None,
             window_start=None,
             window_end=None,
@@ -164,12 +186,36 @@ class ExtractSupportTests(unittest.TestCase):
         client = _RecordingSelectClient(
             pages=[
                 [
-                    {"id": "event-1"},
-                    {"id": "event-2"},
+                    {
+                        "id": "event-1",
+                        "blob_url": (
+                            "https://example.supabase.co/storage/v1/object/public/engagement-blobs/"
+                            "device/session/event-1.jpg"
+                        ),
+                    },
+                    {
+                        "id": "event-2",
+                        "blob_url": (
+                            "https://example.supabase.co/storage/v1/object/public/engagement-blobs/"
+                            "device/session/event-2.jpg"
+                        ),
+                    },
                 ],
                 [
-                    {"id": "event-3"},
-                    {"id": "event-4"},
+                    {
+                        "id": "event-3",
+                        "blob_url": (
+                            "https://example.supabase.co/storage/v1/object/public/engagement-blobs/"
+                            "device/session/event-3.jpg"
+                        ),
+                    },
+                    {
+                        "id": "event-4",
+                        "blob_url": (
+                            "https://example.supabase.co/storage/v1/object/public/engagement-blobs/"
+                            "device/session/event-4.jpg"
+                        ),
+                    },
                 ],
             ]
         )
@@ -177,6 +223,7 @@ class ExtractSupportTests(unittest.TestCase):
         rows = fetch_image_events(
             client,
             schema="public",
+            source_bucket="engagement-blobs",
             limit=3,
             window_start=None,
             window_end=None,
@@ -186,6 +233,44 @@ class ExtractSupportTests(unittest.TestCase):
         self.assertEqual([row["id"] for row in rows], ["event-1", "event-2", "event-3"])
         self.assertEqual([call["offset"] for call in client.calls], [0, 2])
         self.assertEqual([call["limit"] for call in client.calls], [2, 1])
+
+    def test_fetch_image_events_keeps_only_matching_source_bucket(self) -> None:
+        client = _RecordingSelectClient(
+            pages=[
+                [
+                    {
+                        "id": "event-1",
+                        "blob_url": (
+                            "https://example.supabase.co/storage/v1/object/public/engagement-blobs/"
+                            "device/session/a.jpg"
+                        ),
+                    },
+                    {
+                        "id": "event-2",
+                        "blob_url": (
+                            "https://example.supabase.co/storage/v1/object/public/other-bucket/"
+                            "device/session/b.jpg"
+                        ),
+                    },
+                    {
+                        "id": "event-3",
+                        "blob_url": "https://example.supabase.co/not-a-storage-url",
+                    },
+                ]
+            ]
+        )
+
+        rows = fetch_image_events(
+            client,
+            schema="public",
+            source_bucket="engagement-blobs",
+            limit=None,
+            window_start=None,
+            window_end=None,
+            page_size=10,
+        )
+
+        self.assertEqual([row["id"] for row in rows], ["event-1"])
 
     def test_fetch_sessions_for_events_batches_large_session_id_sets(self) -> None:
         client = _RecordingSelectClient(
@@ -317,7 +402,7 @@ class LoadSupportTests(unittest.TestCase):
     def test_materialize_graph_edges_replaces_node_keys_with_node_ids(self) -> None:
         edges = [
             {
-                "pipeline_run_id": "run-1",
+                "last_materialized_run_id": "run-1",
                 "src_node_key": "image:event-1",
                 "edge_type": "occurred_in_session",
                 "dst_node_key": "session:session-1",
@@ -342,7 +427,7 @@ class LoadSupportTests(unittest.TestCase):
             materialized,
             [
                 {
-                    "pipeline_run_id": "run-1",
+                    "last_materialized_run_id": "run-1",
                     "src_node_id": "node-image-1",
                     "edge_type": "occurred_in_session",
                     "dst_node_id": "node-session-1",

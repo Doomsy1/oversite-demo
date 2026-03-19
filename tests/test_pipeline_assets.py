@@ -58,7 +58,7 @@ class BuildImageAssetRecordTests(unittest.TestCase):
             download=download,
         )
 
-        self.assertEqual(asset_record["pipeline_run_id"], "run-1")
+        self.assertEqual(asset_record["last_materialized_run_id"], "run-1")
         self.assertEqual(asset_record["derived_image_id"], "image-1")
         self.assertEqual(asset_record["source_bucket"], "engagement-blobs")
         self.assertEqual(asset_record["source_path"], "device/session/a.png")

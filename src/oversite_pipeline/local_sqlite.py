@@ -19,7 +19,7 @@ TABLE_COLUMNS = {
     ),
     "sessions": (
         "id",
-        "pipeline_run_id",
+        "last_materialized_run_id",
         "source_session_row_id",
         "source_session_id",
         "company_id",
@@ -35,7 +35,7 @@ TABLE_COLUMNS = {
     ),
     "images": (
         "id",
-        "pipeline_run_id",
+        "last_materialized_run_id",
         "derived_session_id",
         "source_event_id",
         "source_session_id",
@@ -65,7 +65,7 @@ TABLE_COLUMNS = {
     ),
     "flags": (
         "id",
-        "pipeline_run_id",
+        "last_materialized_run_id",
         "derived_image_id",
         "flag_type",
         "flag_value",
@@ -74,7 +74,7 @@ TABLE_COLUMNS = {
     ),
     "image_assets": (
         "id",
-        "pipeline_run_id",
+        "last_materialized_run_id",
         "derived_image_id",
         "source_bucket",
         "source_path",
@@ -94,7 +94,7 @@ TABLE_COLUMNS = {
     ),
     "observations": (
         "id",
-        "pipeline_run_id",
+        "last_materialized_run_id",
         "derived_image_id",
         "observation_family",
         "observation_label",
@@ -108,7 +108,7 @@ TABLE_COLUMNS = {
     ),
     "graph_nodes": (
         "id",
-        "pipeline_run_id",
+        "last_materialized_run_id",
         "node_type",
         "node_key",
         "display_label",
@@ -117,7 +117,7 @@ TABLE_COLUMNS = {
     ),
     "graph_edges": (
         "id",
-        "pipeline_run_id",
+        "last_materialized_run_id",
         "src_node_id",
         "edge_type",
         "dst_node_id",
@@ -156,7 +156,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """
         create table if not exists derived.sessions (
             id text primary key,
-            pipeline_run_id text not null references pipeline_runs(id),
+            last_materialized_run_id text not null references pipeline_runs(id),
             source_session_row_id text not null unique,
             source_session_id text not null unique,
             company_id text null,
@@ -174,7 +174,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """
         create table if not exists derived.images (
             id text primary key,
-            pipeline_run_id text not null references pipeline_runs(id),
+            last_materialized_run_id text not null references pipeline_runs(id),
             derived_session_id text not null references sessions(id),
             source_event_id text not null unique,
             source_session_id text not null,
@@ -206,7 +206,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """
         create table if not exists derived.flags (
             id text primary key,
-            pipeline_run_id text not null references pipeline_runs(id),
+            last_materialized_run_id text not null references pipeline_runs(id),
             derived_image_id text not null references images(id),
             flag_type text not null,
             flag_value text not null,
@@ -218,7 +218,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """
         create table if not exists derived.image_assets (
             id text primary key,
-            pipeline_run_id text not null references pipeline_runs(id),
+            last_materialized_run_id text not null references pipeline_runs(id),
             derived_image_id text not null unique references images(id),
             source_bucket text not null,
             source_path text not null,
@@ -240,7 +240,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """
         create table if not exists derived.observations (
             id text primary key,
-            pipeline_run_id text not null references pipeline_runs(id),
+            last_materialized_run_id text not null references pipeline_runs(id),
             derived_image_id text not null references images(id),
             observation_family text not null,
             observation_label text not null,
@@ -257,7 +257,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """
         create table if not exists derived.graph_nodes (
             id text primary key,
-            pipeline_run_id text not null references pipeline_runs(id),
+            last_materialized_run_id text not null references pipeline_runs(id),
             node_type text not null,
             node_key text not null,
             display_label text not null,
@@ -269,7 +269,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """
         create table if not exists derived.graph_edges (
             id text primary key,
-            pipeline_run_id text not null references pipeline_runs(id),
+            last_materialized_run_id text not null references pipeline_runs(id),
             src_node_id text not null references graph_nodes(id),
             edge_type text not null,
             dst_node_id text not null references graph_nodes(id),
@@ -282,7 +282,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """,
         """
         create index if not exists derived.derived_sessions_pipeline_run_id_idx
-        on sessions (pipeline_run_id)
+        on sessions (last_materialized_run_id)
         """,
         """
         create index if not exists derived.derived_sessions_company_id_idx
@@ -294,7 +294,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """,
         """
         create index if not exists derived.derived_images_pipeline_run_id_idx
-        on images (pipeline_run_id)
+        on images (last_materialized_run_id)
         """,
         """
         create index if not exists derived.derived_images_derived_session_id_idx
@@ -338,7 +338,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """,
         """
         create index if not exists derived.derived_flags_pipeline_run_id_idx
-        on flags (pipeline_run_id)
+        on flags (last_materialized_run_id)
         """,
         """
         create index if not exists derived.derived_flags_derived_image_id_idx
@@ -366,7 +366,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """,
         """
         create index if not exists derived.derived_graph_nodes_pipeline_run_id_idx
-        on graph_nodes (pipeline_run_id)
+        on graph_nodes (last_materialized_run_id)
         """,
         """
         create index if not exists derived.derived_graph_nodes_node_type_idx
@@ -374,7 +374,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         """,
         """
         create index if not exists derived.derived_graph_edges_pipeline_run_id_idx
-        on graph_edges (pipeline_run_id)
+        on graph_edges (last_materialized_run_id)
         """,
         """
         create index if not exists derived.derived_graph_edges_src_node_id_idx
@@ -400,7 +400,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         )
         select
             i.id as image_id,
-            i.pipeline_run_id,
+            i.last_materialized_run_id,
             i.derived_session_id,
             i.source_event_id,
             i.source_session_id,
@@ -440,7 +440,7 @@ def initialize_local_sqlite(conn: sqlite3.Connection) -> None:
         create view if not exists derived.v_graph_edges_enriched as
         select
             e.id as edge_id,
-            e.pipeline_run_id,
+            e.last_materialized_run_id,
             e.edge_type,
             src.node_type as src_node_type,
             src.node_key as src_node_key,

@@ -136,6 +136,7 @@ class RunPipelineTests(unittest.TestCase):
         self.assertEqual(summary["observation_count"], 6)
         self.assertEqual(len(fake_client.tables["image_assets"]), 1)
         self.assertEqual(len(fake_client.tables["observations"]), 6)
+        self.assertEqual(fake_client.tables["images"][0]["last_materialized_run_id"], summary["pipeline_run_id"])
         self.assertEqual(manifest_rows[0]["fetch_status"], "fetched")
         self.assertIn("observations", manifest_rows[0])
 

@@ -74,7 +74,7 @@ def materialize_graph_edges(
         dst_node = node_map[(dst_type, edge["dst_node_key"])]
         materialized.append(
             {
-                "pipeline_run_id": edge["pipeline_run_id"],
+                "last_materialized_run_id": edge["last_materialized_run_id"],
                 "src_node_id": src_node["id"],
                 "edge_type": edge["edge_type"],
                 "dst_node_id": dst_node["id"],

@@ -54,6 +54,7 @@ def build_local_bundle(*, config: PipelineConfig, limit: int | None) -> dict[str
     events = fetch_image_events(
         client,
         schema=config.source_schema,
+        source_bucket=config.source_bucket,
         limit=limit,
         page_size=config.pipeline_page_size,
     )

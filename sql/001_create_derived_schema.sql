@@ -17,7 +17,7 @@ create table if not exists derived.pipeline_runs (
 
 create table if not exists derived.sessions (
     id uuid primary key default gen_random_uuid(),
-    pipeline_run_id uuid not null references derived.pipeline_runs(id),
+    last_materialized_run_id uuid not null references derived.pipeline_runs(id),
     source_session_row_id text not null,
     source_session_id text not null,
     company_id text null,
@@ -39,7 +39,7 @@ create unique index if not exists derived_sessions_source_session_id_uq
     on derived.sessions (source_session_id);
 
 create index if not exists derived_sessions_pipeline_run_id_idx
-    on derived.sessions (pipeline_run_id);
+    on derived.sessions (last_materialized_run_id);
 
 create index if not exists derived_sessions_company_id_idx
     on derived.sessions (company_id);
@@ -49,7 +49,7 @@ create index if not exists derived_sessions_device_id_idx
 
 create table if not exists derived.images (
     id uuid primary key default gen_random_uuid(),
-    pipeline_run_id uuid not null references derived.pipeline_runs(id),
+    last_materialized_run_id uuid not null references derived.pipeline_runs(id),
     derived_session_id uuid not null references derived.sessions(id),
     source_event_id text not null,
     source_session_id text not null,
@@ -82,7 +82,7 @@ create unique index if not exists derived_images_source_event_id_uq
     on derived.images (source_event_id);
 
 create index if not exists derived_images_pipeline_run_id_idx
-    on derived.images (pipeline_run_id);
+    on derived.images (last_materialized_run_id);
 
 create index if not exists derived_images_derived_session_id_idx
     on derived.images (derived_session_id);
@@ -116,7 +116,7 @@ create index if not exists derived_images_location_hint_idx
 
 create table if not exists derived.flags (
     id uuid primary key default gen_random_uuid(),
-    pipeline_run_id uuid not null references derived.pipeline_runs(id),
+    last_materialized_run_id uuid not null references derived.pipeline_runs(id),
     derived_image_id uuid not null references derived.images(id),
     flag_type text not null,
     flag_value text not null,
@@ -128,7 +128,7 @@ create unique index if not exists derived_flags_image_type_value_uq
     on derived.flags (derived_image_id, flag_type, flag_value);
 
 create index if not exists derived_flags_pipeline_run_id_idx
-    on derived.flags (pipeline_run_id);
+    on derived.flags (last_materialized_run_id);
 
 create index if not exists derived_flags_derived_image_id_idx
     on derived.flags (derived_image_id);
@@ -141,7 +141,7 @@ create index if not exists derived_flags_flag_value_idx
 
 create table if not exists derived.image_assets (
     id uuid primary key default gen_random_uuid(),
-    pipeline_run_id uuid not null references derived.pipeline_runs(id),
+    last_materialized_run_id uuid not null references derived.pipeline_runs(id),
     derived_image_id uuid not null references derived.images(id),
     source_bucket text not null,
     source_path text not null,
@@ -168,7 +168,7 @@ create index if not exists derived_image_assets_fetch_status_idx
 
 create table if not exists derived.observations (
     id uuid primary key default gen_random_uuid(),
-    pipeline_run_id uuid not null references derived.pipeline_runs(id),
+    last_materialized_run_id uuid not null references derived.pipeline_runs(id),
     derived_image_id uuid not null references derived.images(id),
     observation_family text not null,
     observation_label text not null,
@@ -192,7 +192,7 @@ create index if not exists derived_observations_image_id_idx
 
 create table if not exists derived.graph_nodes (
     id uuid primary key default gen_random_uuid(),
-    pipeline_run_id uuid not null references derived.pipeline_runs(id),
+    last_materialized_run_id uuid not null references derived.pipeline_runs(id),
     node_type text not null,
     node_key text not null,
     display_label text not null,
@@ -204,14 +204,14 @@ create unique index if not exists derived_graph_nodes_type_key_uq
     on derived.graph_nodes (node_type, node_key);
 
 create index if not exists derived_graph_nodes_pipeline_run_id_idx
-    on derived.graph_nodes (pipeline_run_id);
+    on derived.graph_nodes (last_materialized_run_id);
 
 create index if not exists derived_graph_nodes_node_type_idx
     on derived.graph_nodes (node_type);
 
 create table if not exists derived.graph_edges (
     id uuid primary key default gen_random_uuid(),
-    pipeline_run_id uuid not null references derived.pipeline_runs(id),
+    last_materialized_run_id uuid not null references derived.pipeline_runs(id),
     src_node_id uuid not null references derived.graph_nodes(id),
     edge_type text not null,
     dst_node_id uuid not null references derived.graph_nodes(id),
@@ -225,7 +225,7 @@ create unique index if not exists derived_graph_edges_src_type_dst_uq
     on derived.graph_edges (src_node_id, edge_type, dst_node_id);
 
 create index if not exists derived_graph_edges_pipeline_run_id_idx
-    on derived.graph_edges (pipeline_run_id);
+    on derived.graph_edges (last_materialized_run_id);
 
 create index if not exists derived_graph_edges_src_node_id_idx
     on derived.graph_edges (src_node_id);

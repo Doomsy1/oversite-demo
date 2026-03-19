@@ -159,6 +159,7 @@ def run_pipeline(
     events = fetch_image_events(
         client,
         schema=config.source_schema,
+        source_bucket=config.source_bucket,
         limit=limit,
         window_start=window_start,
         window_end=window_end,
@@ -285,7 +286,7 @@ def run_pipeline(
             session_row = session_map.get(event["session_id"])
             if image_row is None or session_row is None:
                 continue
-            image_with_id = {**image_row, "pipeline_run_id": pipeline_run_id}
+            image_with_id = {**image_row, "last_materialized_run_id": pipeline_run_id}
             flags = build_flag_records(image_with_id)
             observations = derive_observations(image_with_id)
             flag_rows.extend(flags)

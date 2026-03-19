@@ -28,7 +28,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "sessions": [
                         {
                             "id": "session-row-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "source_session_row_id": "source-session-row-1",
                             "source_session_id": "session-1",
                             "company_id": "company-1",
@@ -44,7 +44,7 @@ class LocalSqliteTests(unittest.TestCase):
                         },
                         {
                             "id": "session-row-2",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "source_session_row_id": "source-session-row-2",
                             "source_session_id": "session-2",
                             "company_id": "company-1",
@@ -62,7 +62,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "images": [
                         {
                             "id": "image-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_session_id": "session-row-1",
                             "source_event_id": "event-1",
                             "source_session_id": "session-1",
@@ -92,7 +92,7 @@ class LocalSqliteTests(unittest.TestCase):
                         },
                         {
                             "id": "image-2",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_session_id": "session-row-2",
                             "source_event_id": "event-2",
                             "source_session_id": "session-2",
@@ -124,7 +124,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "flags": [
                         {
                             "id": "flag-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_image_id": "image-1",
                             "flag_type": "event_type",
                             "flag_value": "issue_flagged",
@@ -133,7 +133,7 @@ class LocalSqliteTests(unittest.TestCase):
                         },
                         {
                             "id": "flag-2",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_image_id": "image-2",
                             "flag_type": "event_type",
                             "flag_value": "issue_flagged",
@@ -144,7 +144,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "image_assets": [
                         {
                             "id": "asset-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_image_id": "image-1",
                             "source_bucket": "engagement-blobs",
                             "source_path": "DEVICE/SESSION/image.jpg",
@@ -164,7 +164,7 @@ class LocalSqliteTests(unittest.TestCase):
                         },
                         {
                             "id": "asset-2",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_image_id": "image-2",
                             "source_bucket": "engagement-blobs",
                             "source_path": "DEVICE/SESSION/image-2.jpg",
@@ -186,7 +186,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "observations": [
                         {
                             "id": "obs-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_image_id": "image-1",
                             "observation_family": "trade",
                             "observation_label": "Safety",
@@ -200,7 +200,7 @@ class LocalSqliteTests(unittest.TestCase):
                         },
                         {
                             "id": "obs-location-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_image_id": "image-1",
                             "observation_family": "location_hint",
                             "observation_label": "Near desk",
@@ -214,7 +214,7 @@ class LocalSqliteTests(unittest.TestCase):
                         },
                         {
                             "id": "obs-2",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_image_id": "image-2",
                             "observation_family": "trade",
                             "observation_label": "safety",
@@ -228,7 +228,7 @@ class LocalSqliteTests(unittest.TestCase):
                         },
                         {
                             "id": "obs-location-2",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "derived_image_id": "image-2",
                             "observation_family": "location_hint",
                             "observation_label": "Near desk!",
@@ -244,7 +244,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "graph_nodes": [
                         {
                             "id": "node-hazard-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "node_type": "hazard",
                             "node_key": "hazard:exposed wiring",
                             "display_label": "Exposed wiring",
@@ -253,7 +253,7 @@ class LocalSqliteTests(unittest.TestCase):
                         },
                         {
                             "id": "node-location-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "node_type": "location_hint",
                             "node_key": "location_hint:near desk",
                             "display_label": "Near desk",
@@ -264,7 +264,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "graph_edges": [
                         {
                             "id": "edge-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "src_node_id": "node-hazard-1",
                             "edge_type": "hazard_near_location_hint",
                             "dst_node_id": "node-location-1",
@@ -345,7 +345,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "sessions": [
                         {
                             "id": "session-row-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "source_session_row_id": "source-session-row-1",
                             "source_session_id": "session-1",
                             "company_id": "company-1",
@@ -367,7 +367,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "graph_nodes": [
                         {
                             "id": "node-session-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "node_type": "session",
                             "node_key": "session:session-1",
                             "display_label": "session-1",
@@ -376,7 +376,7 @@ class LocalSqliteTests(unittest.TestCase):
                         },
                         {
                             "id": "node-company-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "node_type": "company",
                             "node_key": "company:company-1",
                             "display_label": "company-1",
@@ -387,7 +387,7 @@ class LocalSqliteTests(unittest.TestCase):
                     "graph_edges": [
                         {
                             "id": "edge-1",
-                            "pipeline_run_id": "run-1",
+                            "last_materialized_run_id": "run-1",
                             "src_node_id": "node-session-1",
                             "edge_type": "belongs_to_company",
                             "dst_node_id": "node-company-1",

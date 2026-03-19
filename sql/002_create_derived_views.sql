@@ -9,7 +9,7 @@ with flag_rollup as (
 )
 select
     i.id as image_id,
-    i.pipeline_run_id,
+    i.last_materialized_run_id,
     i.derived_session_id,
     i.source_event_id,
     i.source_session_id,
@@ -48,7 +48,7 @@ left join flag_rollup fr
 create or replace view derived.v_graph_edges_enriched as
 select
     e.id as edge_id,
-    e.pipeline_run_id,
+    e.last_materialized_run_id,
     e.edge_type,
     src.node_type as src_node_type,
     src.node_key as src_node_key,

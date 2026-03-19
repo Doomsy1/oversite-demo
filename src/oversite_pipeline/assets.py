@@ -147,7 +147,7 @@ def build_image_asset_record(
     download: dict[str, Any],
 ) -> dict[str, Any]:
     return {
-        "pipeline_run_id": pipeline_run_id,
+        "last_materialized_run_id": pipeline_run_id,
         "derived_image_id": image_record["id"],
         "source_bucket": image_record["storage_bucket"],
         "source_path": image_record["storage_path"],

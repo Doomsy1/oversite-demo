@@ -2,7 +2,7 @@
 __pycache__/
 local/*.db
 local/*.jsonl
-docs/
+private_docs/
 local/
 .venv/
 .pytest_cache/

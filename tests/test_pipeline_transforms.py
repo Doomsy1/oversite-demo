@@ -60,7 +60,7 @@ class NormalizeImageRecordTests(unittest.TestCase):
             derived_session_id="derived-session-1",
         )
 
-        self.assertEqual(record["pipeline_run_id"], "run-1")
+        self.assertEqual(record["last_materialized_run_id"], "run-1")
         self.assertEqual(record["derived_session_id"], "derived-session-1")
         self.assertEqual(record["source_event_id"], "event-1")
         self.assertEqual(record["event_type"], "issue_flagged")
@@ -122,7 +122,7 @@ class NormalizeSessionRecordTests(unittest.TestCase):
 
         record = normalize_session_record(session=session, pipeline_run_id="run-1")
 
-        self.assertEqual(record["pipeline_run_id"], "run-1")
+        self.assertEqual(record["last_materialized_run_id"], "run-1")
         self.assertEqual(record["source_session_row_id"], "row-1")
         self.assertEqual(record["source_session_id"], "session-1")
         self.assertEqual(record["source_event_count"], 31)
@@ -133,7 +133,7 @@ class NormalizeSessionRecordTests(unittest.TestCase):
 class BuildFlagRecordsTests(unittest.TestCase):
     def test_build_flag_records_only_emits_explicit_flag_event(self) -> None:
         image_record = {
-            "pipeline_run_id": "run-1",
+            "last_materialized_run_id": "run-1",
             "id": "image-1",
             "event_type": "issue_flagged",
             "raw_metadata": {"priority": "High"},
@@ -145,7 +145,7 @@ class BuildFlagRecordsTests(unittest.TestCase):
             flags,
             [
                 {
-                    "pipeline_run_id": "run-1",
+                    "last_materialized_run_id": "run-1",
                     "derived_image_id": "image-1",
                     "flag_type": "event_type",
                     "flag_value": "issue_flagged",
@@ -160,14 +160,14 @@ class BuildGraphBundleTests(unittest.TestCase):
     def test_build_graph_bundle_creates_nodes_and_edges_for_issue_context(self) -> None:
         session_record = {
             "id": "derived-session-1",
-            "pipeline_run_id": "run-1",
+            "last_materialized_run_id": "run-1",
             "source_session_id": "session-1",
             "company_id": "company-1",
             "device_id": "device-1",
         }
         image_record = {
             "id": "image-1",
-            "pipeline_run_id": "run-1",
+            "last_materialized_run_id": "run-1",
             "source_event_id": "event-1",
             "event_timestamp": "2026-03-18T22:02:05.602+00:00",
         }
@@ -247,14 +247,14 @@ class BuildGraphBundleTests(unittest.TestCase):
     def test_build_graph_bundle_skips_company_when_source_company_is_missing(self) -> None:
         session_record = {
             "id": "derived-session-1",
-            "pipeline_run_id": "run-1",
+            "last_materialized_run_id": "run-1",
             "source_session_id": "session-1",
             "company_id": None,
             "device_id": "device-1",
         }
         image_record = {
             "id": "image-1",
-            "pipeline_run_id": "run-1",
+            "last_materialized_run_id": "run-1",
             "source_event_id": "event-1",
             "event_timestamp": "2026-03-18T22:02:05.602+00:00",
         }

@@ -24,7 +24,7 @@ def _append_observation(
 ) -> None:
     rows.append(
         {
-            "pipeline_run_id": image_record.get("pipeline_run_id"),
+            "last_materialized_run_id": image_record.get("last_materialized_run_id"),
             "derived_image_id": image_record.get("id"),
             "observation_family": family,
             "observation_label": label,
