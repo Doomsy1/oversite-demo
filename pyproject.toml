@@ -1,0 +1,18 @@
+[project]
+name = "oversite-demo"
+version = "0.1.0"
+description = "Derived issue-and-evidence pipeline for Oversite"
+requires-python = ">=3.12"
+
+[project.scripts]
+oversite-pipeline = "oversite_pipeline.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

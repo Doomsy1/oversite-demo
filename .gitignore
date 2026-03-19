@@ -1,1 +1,11 @@
 .env
+__pycache__/
+local/*.db
+local/*.jsonl
+docs/
+local/
+.venv/
+.pytest_cache/
+
+AGENTS.md
+src/oversite_demo.egg-info/
