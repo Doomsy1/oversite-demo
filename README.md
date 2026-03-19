@@ -11,6 +11,7 @@ This repo builds a latest-state derived layer from image-bearing Supabase `event
 Short context:
 
 - [`docs/review-notes.md`](docs/review-notes.md)
+- [`docs/source-notes.md`](docs/source-notes.md)
 
 ## What's Included
 

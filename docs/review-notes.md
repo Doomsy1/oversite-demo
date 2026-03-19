@@ -5,6 +5,7 @@
 - Image-bearing rows are `events` records where `blob_url is not null`
 - The main join is `events.session_id -> sessions.session_id`
 - V1 normalizes `priority`, `trade`, `location`, and `site` when present
+- The pipeline is intentionally built around image-bearing events, not one hard-coded event type
 
 ## Run Model
 
@@ -17,6 +18,7 @@
 - CV inference
 - Canonical site hierarchy
 - Durable cross-session object identity
+- Canonical location resolution from free-text hints
 
 Start with the schema, then normalization, then the pipeline entrypoint:
 
