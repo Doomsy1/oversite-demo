@@ -16,6 +16,7 @@ def build_select_url(
     filters: dict[str, str] | Sequence[tuple[str, str]] | None = None,
     order: str | None = None,
     limit: int | None = None,
+    offset: int | None = None,
 ) -> str:
     del schema
     query: list[tuple[str, str]] = [("select", columns)]
@@ -25,6 +26,8 @@ def build_select_url(
         query.append(("order", order))
     if limit is not None:
         query.append(("limit", str(limit)))
+    if offset is not None:
+        query.append(("offset", str(offset)))
     return f"{base_url.rstrip('/')}/rest/v1/{table}?{urlencode(query)}"
 
 
@@ -64,6 +67,7 @@ class SupabaseRestClient:
         filters: dict[str, str] | Sequence[tuple[str, str]] | None = None,
         order: str | None = None,
         limit: int | None = None,
+        offset: int | None = None,
     ) -> list[dict[str, Any]]:
         url = build_select_url(
             base_url=self.base_url,
@@ -73,6 +77,7 @@ class SupabaseRestClient:
             filters=filters,
             order=order,
             limit=limit,
+            offset=offset,
         )
         headers = build_headers(
             secret_key=self.secret_key,

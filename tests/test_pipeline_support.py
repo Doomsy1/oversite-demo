@@ -7,7 +7,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from oversite_pipeline.clients.supabase_rest import build_headers, build_select_url
 from oversite_pipeline.config import PipelineConfig
-from oversite_pipeline.extract.source import collect_session_ids, fetch_image_events
+from oversite_pipeline.extract.source import (
+    collect_session_ids,
+    fetch_image_events,
+    fetch_sessions_for_events,
+)
 from oversite_pipeline.load.prepare import dedupe_graph_rows, materialize_graph_edges
 
 
@@ -130,10 +134,93 @@ class ExtractSupportTests(unittest.TestCase):
             ],
         )
 
+    def test_fetch_image_events_paginates_until_source_exhaustion(self) -> None:
+        client = _RecordingSelectClient(
+            pages=[
+                [
+                    {"id": "event-1"},
+                    {"id": "event-2"},
+                ],
+                [
+                    {"id": "event-3"},
+                ],
+            ]
+        )
+
+        rows = fetch_image_events(
+            client,
+            schema="public",
+            limit=None,
+            window_start=None,
+            window_end=None,
+            page_size=2,
+        )
+
+        self.assertEqual([row["id"] for row in rows], ["event-1", "event-2", "event-3"])
+        self.assertEqual([call["offset"] for call in client.calls], [0, 2])
+        self.assertEqual([call["limit"] for call in client.calls], [2, 2])
+
+    def test_fetch_image_events_respects_limit_across_page_boundaries(self) -> None:
+        client = _RecordingSelectClient(
+            pages=[
+                [
+                    {"id": "event-1"},
+                    {"id": "event-2"},
+                ],
+                [
+                    {"id": "event-3"},
+                    {"id": "event-4"},
+                ],
+            ]
+        )
+
+        rows = fetch_image_events(
+            client,
+            schema="public",
+            limit=3,
+            window_start=None,
+            window_end=None,
+            page_size=2,
+        )
+
+        self.assertEqual([row["id"] for row in rows], ["event-1", "event-2", "event-3"])
+        self.assertEqual([call["offset"] for call in client.calls], [0, 2])
+        self.assertEqual([call["limit"] for call in client.calls], [2, 1])
+
+    def test_fetch_sessions_for_events_batches_large_session_id_sets(self) -> None:
+        client = _RecordingSelectClient(
+            pages=[
+                [
+                    {"session_id": "session-1", "id": "row-1"},
+                    {"session_id": "session-2", "id": "row-2"},
+                ],
+                [
+                    {"session_id": "session-3", "id": "row-3"},
+                ],
+            ]
+        )
+
+        rows = fetch_sessions_for_events(
+            client,
+            schema="public",
+            events=[
+                {"session_id": "session-1"},
+                {"session_id": "session-2"},
+                {"session_id": "session-3"},
+            ],
+            page_size=2,
+        )
+
+        self.assertEqual(sorted(rows), ["session-1", "session-2", "session-3"])
+        self.assertEqual(len(client.calls), 2)
+        self.assertEqual(client.calls[0]["filters"], {"session_id": "in.(session-1,session-2)"})
+        self.assertEqual(client.calls[1]["filters"], {"session_id": "in.(session-3)"})
+
 
 class _RecordingSelectClient:
-    def __init__(self) -> None:
+    def __init__(self, pages: list[list[dict[str, object]]] | None = None) -> None:
         self.calls: list[dict[str, object]] = []
+        self.pages = pages or []
 
     def select(
         self,
@@ -144,6 +231,7 @@ class _RecordingSelectClient:
         filters: list[tuple[str, str]] | dict[str, str] | None = None,
         order: str | None = None,
         limit: int | None = None,
+        offset: int | None = None,
     ) -> list[dict[str, object]]:
         self.calls.append(
             {
@@ -153,9 +241,13 @@ class _RecordingSelectClient:
                 "filters": filters,
                 "order": order,
                 "limit": limit,
+                "offset": offset,
             }
         )
-        return []
+        if not self.pages:
+            return []
+        page = self.pages.pop(0)
+        return page if limit is None else page[:limit]
 
 
 class LoadSupportTests(unittest.TestCase):

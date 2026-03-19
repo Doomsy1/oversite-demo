@@ -20,6 +20,10 @@ def collect_session_ids(events: list[dict[str, Any]]) -> list[str]:
     return sorted(session_ids)
 
 
+def _chunked(values: list[str], size: int) -> list[list[str]]:
+    return [values[index : index + size] for index in range(0, len(values), size)]
+
+
 def fetch_image_events(
     client: SupabaseRestClient,
     *,
@@ -27,20 +31,34 @@ def fetch_image_events(
     limit: int | None = None,
     window_start: str | None = None,
     window_end: str | None = None,
+    page_size: int = 200,
 ) -> list[dict[str, Any]]:
     filters: list[tuple[str, str]] = [("blob_url", "not.is.null")]
     if window_start:
         filters.append(("timestamp", f"gte.{window_start}"))
     if window_end:
         filters.append(("timestamp", f"lte.{window_end}"))
-    return client.select(
-        schema=schema,
-        table="events",
-        columns=IMAGE_EVENT_COLUMNS,
-        filters=filters,
-        order="timestamp.asc",
-        limit=limit,
-    )
+
+    rows: list[dict[str, Any]] = []
+    offset = 0
+    while True:
+        request_limit = page_size if limit is None else min(page_size, limit - len(rows))
+        if request_limit <= 0:
+            break
+        page = client.select(
+            schema=schema,
+            table="events",
+            columns=IMAGE_EVENT_COLUMNS,
+            filters=filters,
+            order="timestamp.asc",
+            limit=request_limit,
+            offset=offset,
+        )
+        rows.extend(page)
+        if len(page) < request_limit:
+            break
+        offset += len(page)
+    return rows
 
 
 def fetch_sessions_for_events(
@@ -48,15 +66,20 @@ def fetch_sessions_for_events(
     *,
     schema: str,
     events: list[dict[str, Any]],
+    page_size: int = 200,
 ) -> dict[str, dict[str, Any]]:
     session_ids = collect_session_ids(events)
     if not session_ids:
         return {}
-    session_filter = f"in.({','.join(session_ids)})"
-    rows = client.select(
-        schema=schema,
-        table="sessions",
-        columns=SESSION_COLUMNS,
-        filters={"session_id": session_filter},
-    )
+    rows: list[dict[str, Any]] = []
+    for session_batch in _chunked(session_ids, page_size):
+        session_filter = f"in.({','.join(session_batch)})"
+        rows.extend(
+            client.select(
+                schema=schema,
+                table="sessions",
+                columns=SESSION_COLUMNS,
+                filters={"session_id": session_filter},
+            )
+        )
     return {row["session_id"]: row for row in rows}

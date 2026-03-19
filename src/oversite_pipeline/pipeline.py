@@ -162,11 +162,13 @@ def run_pipeline(
         limit=limit,
         window_start=window_start,
         window_end=window_end,
+        page_size=config.pipeline_page_size,
     )
     sessions_by_source_id = fetch_sessions_for_events(
         client,
         schema=config.source_schema,
         events=events,
+        page_size=config.pipeline_page_size,
     )
 
     if dry_run:

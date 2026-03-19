@@ -43,8 +43,8 @@ def _aggregate_edges(edges: list[dict[str, Any]]) -> list[dict[str, Any]]:
         image_count = len(group.pop("_image_ids"))
         session_count = len(group.pop("_session_ids"))
         group["attributes"] = {
-            "evidence_image_count": image_count or 1,
-            "evidence_session_count": session_count or 1,
+            "evidence_image_count": image_count,
+            "evidence_session_count": session_count,
             "first_seen_at": timestamps[0] if timestamps else None,
             "last_seen_at": timestamps[-1] if timestamps else None,
         }

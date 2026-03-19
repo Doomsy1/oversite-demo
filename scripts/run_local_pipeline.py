@@ -51,11 +51,17 @@ def build_local_bundle(*, config: PipelineConfig, limit: int | None) -> dict[str
         base_url=config.supabase_url,
         secret_key=config.supabase_secret_key,
     )
-    events = fetch_image_events(client, schema=config.source_schema, limit=limit)
+    events = fetch_image_events(
+        client,
+        schema=config.source_schema,
+        limit=limit,
+        page_size=config.pipeline_page_size,
+    )
     sessions_by_source_id = fetch_sessions_for_events(
         client,
         schema=config.source_schema,
         events=events,
+        page_size=config.pipeline_page_size,
     )
 
     pipeline_run_id = _new_id()
@@ -79,6 +85,7 @@ def build_local_bundle(*, config: PipelineConfig, limit: int | None) -> dict[str
         session_map[row["source_session_id"]] = row
 
     image_rows: list[dict[str, object]] = []
+    image_assets: list[dict[str, object]] = []
     event_to_image: dict[str, dict[str, object]] = {}
     for event in events:
         session_row = session_map.get(event["session_id"])
@@ -97,28 +104,16 @@ def build_local_bundle(*, config: PipelineConfig, limit: int | None) -> dict[str
         )
         row = _assign_id(update_image_from_download(row, download))
         image_rows.append(row)
-        event_to_image[row["source_event_id"]] = row
-    image_assets = [
-        _assign_id(
-            build_image_asset_record(
-                pipeline_run_id=pipeline_run_id,
-                image_record=image_row,
-                download={
-                    "fetch_status": image_row["image_fetch_status"],
-                    "fetch_http_status": 200 if image_row["image_fetch_status"] == "fetched" else None,
-                    "fetched_at": started_at,
-                    "raw_headers": None,
-                    "raw_error": None,
-                    "image_sha256": image_row["image_sha256"],
-                    "image_mime_type": image_row["image_mime_type"],
-                    "image_width": image_row["image_width"],
-                    "image_height": image_row["image_height"],
-                    "image_bytes": image_row["image_bytes"],
-                },
+        image_assets.append(
+            _assign_id(
+                build_image_asset_record(
+                    pipeline_run_id=pipeline_run_id,
+                    image_record=row,
+                    download=download,
+                )
             )
         )
-        for image_row in image_rows
-    ]
+        event_to_image[row["source_event_id"]] = row
 
     flag_rows: list[dict[str, object]] = []
     observation_rows: list[dict[str, object]] = []
