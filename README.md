@@ -61,3 +61,7 @@ oversite-pipeline run --limit 50 --export-manifest
 ## Current Live Constraint
 
 Live writes require the Supabase project to expose the `derived` schema through the REST API settings.
+
+## License
+
+Licensed under the [MIT License](LICENSE).
